@@ -1,0 +1,137 @@
+#package needed.
+
+ipak <- function(pkg){
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+}
+
+# usage
+packages <- c("parameters","apa","haven", "paran", "openxlsx", "EFAtools", "ggplot2","ggpubr","gridExtra","apaTables", "reshape", "GPArotation", "mvtnorm", "psych", "psychometric", "lavaan", "nFactors", "semPlot", "lavaan", "MVN", "semTools")
+ipak(packages)
+
+#ANALISIS FACTORIAL EXPLORATORIO
+#Abrir base de datos
+SAP <- read.xlsx('SAP38.xlsx')
+SAP38 = SAP38[, 1:38]
+
+"""#Segmentar base de datos en caso de hacer AF en dos pasos
+set.seed(1234)
+ind <- sample(2, nrow(SAP38), replace = TRUE, prob = c(0.5, 0.5))
+DATA1 <- SAP38[ind == 1, ]
+DATA2 <- SAP38[ind == 2, ] 
+
+#Guardar nuevas bases de datos
+install.packages("writexl")
+library("writexl")
+write_xlsx(data1,"C:/Users/j_fmo/Desktop/base1.xlsx")"""
+
+#Adecuacion de los datos
+KMO(SAP38)
+BARTLETT(SAP38, use = c("all.obs"), cor_method = c("pearson"))
+
+"""KMO(DATA1)
+BARTLETT(DATA1, use = c("all.obs"), cor_method = c("pearson"))
+
+KMO(DATA2)
+BARTLETT(DATA2, use = c("all.obs"), cor_method = c("pearson"))"""
+
+#Analisis paralelo
+paran(DATA1, 
+      iterations = 2000, 
+      centile = 95, 
+      quietly = FALSE, 
+      status = TRUE,
+      all = TRUE,
+      cfa = FALSE,
+      graph = TRUE,
+      color = TRUE,
+      col = c("black", "red", "blue"),
+      lty=c(1,2,3),
+      seed = 1995)
+
+#Exploratory Factorial ANalysis ASI
+SAPfactor<-fa(DATA2,
+              nfactors = 3,
+              fm = "ml", 
+              residual = TRUE, 
+              max.iter = "2000", 
+              rotate ="oblimin",
+              cor = "cor", 
+              warnings = TRUE,
+              alpha = .05,
+              p = .95,
+              oblique.scores = TRUE)
+
+print(SAPfactor,digits = 4,cut = .40,sort=TRUE)
+fa.diagram(SAPfactor)
+
+#ANALISIS FACTORIAL CONFIRMATORIO
+TREINTAYOCHOfactor<-'SP =~ B13.SE + B34.SE + B41.SE + B5.SM + B45.SE + B20.SE + B27.SE + B6.SE + B33.SM + B50.SE + B40.SM + B7.SC + B12.SM + B28.SC + B21.SC + B42.SC + B49.SC 
+SF =~ B9.VS + B2.VS + B23.VS + B37.VS + B30.VS + B16.VS + B8.SF + B19.SM + B43.VS + B36.SF
+FF =~ B38.MF + B31.MF + B24.MF + B44.MF + B32.CF + B10.MF + B39.CF + B4.MF + B3.MF + B18.CF + B17.MF'
+
+SAP38 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, data=SAP38, estimator="ULSMVS",ordered =names(SAP38))
+SAP38 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, estimator="MLM", data=SAP38)
+
+"""SAP1 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, data=DATA1, estimator="ULSMVS",ordered =names(DATA1))
+SAP1 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, estimator="MLM", data=DATA1)
+
+SAP2 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, data=SAP38, estimator="ULSMVS",ordered =names(DATA2))
+SAP2 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, estimator="MLM", data=DATA2)"""
+
+summary(CFA38, fit.measures=TRUE)
+fitMeasures(DATA2)
+semPaths(CFA38, intercepts = FALSE,
+         edge.label.cex=1.5, 
+         optimizeLatRes = TRUE, 
+         groups = "lat",
+         pastel = TRUE, 
+         exoVar = FALSE, 
+         sizeInt=5,
+         edge.color ="black",
+         esize = 6, 
+         label.prop=2,
+         sizeLat = 6,"std", 
+         layout="circle")
+
+modindices(CFA12, sort = TRUE, maximum.number = 50)
+
+standardizedSolution(CFA12, type = "std.all", se = TRUE, zstat = TRUE, 
+                     pvalue = TRUE, ci = TRUE, level = 0.95, cov.std = TRUE, 
+                     remove.eq = TRUE, remove.ineq = TRUE, remove.def = FALSE, 
+                     partable = NULL, GLIST = NULL, est = NULL,
+                     output = "data.frame")
+lavResiduals(CFA12, type = "cor", custom.rmr = NULL,
+             se = TRUE, zstat = TRUE, summary = TRUE, h1.acov = "unstructured",
+             add.type = TRUE, add.labels = TRUE, add.class = TRUE,
+             drop.list.single.group = TRUE,
+             maximum.number = length(res.vech), output = "list")
+
+#INVARIANZA DE MEDICION
+#Modelo configuracional
+cfa.config <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "salud")
+summary(cfa.config, fit.measures = TRUE, standardized = TRUE)
+
+#Invarianza métrica-debil
+#Modelo metrico
+cfa.metric <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "salud", 
+                  group.equal = "loadings")
+
+#Comparacion de modelos (Modelo configuracional vs Modelo metrico)
+compareFit(cfa.config, cfa.metric)
+summary(compareFit(cfa.config, cfa.metric))
+
+#Invarianza escalar-fuerte
+cfa.scalar <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "salud", group.equal = c("loadings","intercepts"))
+#Comparacion de modelos
+summary(compareFit(cfa.metric, cfa.scalar))
+
+"""#Analizar que reactivos son contestados diferente entre grupos
+lavTestScore(cfa.scalar)
+parTable(cfa.scalar, max.print = 10000)"""
+
+#Invarianza estricta
+cfa.strict <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "salud", group.equal = c("loadings","intercepts", "residuals"))
+summary(compareFit(cfa.scalar, cfa.strict))
