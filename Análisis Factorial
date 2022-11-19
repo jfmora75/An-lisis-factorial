@@ -84,74 +84,6 @@ omega(SAP)
 sink()
 
 #ANALISIS FACTORIAL CONFIRMATORIO
-#Modelo con 38 reactivos """al ser un ejemplo propio, probamos con modelos con diferente numero de reactivos"""
-TREINTAYOCHOfactor<-'SP =~ B13.SE + B34.SE + B41.SE + B45.SE + B20.SE + B33.SM + B6.SE + B5.SM + B27.SE + B7.SC + B50.SE + B28.SC + B12.SM + B42.SC + B21.SC + B40.SM + B49.SC 
-SF =~ B9.VS + B2.VS + B37.VS + B23.VS + B16.VS + B30.VS + B8.SF + B19.SM + B36.SF + B43.VS 
-FF =~ B38.MF + B31.MF + B24.MF + B10.MF + B32.CF + B3.MF + B39.CF + B44.MF + B17.MF+ B4.MF + B18.CF'
-
-AFC38 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, data=SAP38, estimator="ULSMVS",ordered =names(AFC))
-AFC38 <- cfa(TREINTAYOCHOfactor,orthogonal=FALSE, estimator="MLM", data=AFC)
-summary(AFC38, fit.measures=TRUE)
-fitMeasures(DATA2)
-semPaths(CFA38, intercepts = FALSE,
-         edge.label.cex=1.5, 
-         optimizeLatRes = TRUE, 
-         groups = "lat",
-         pastel = TRUE, 
-         exoVar = FALSE, 
-         sizeInt=5,
-         edge.color ="black",
-         esize = 6, 
-         label.prop=2,
-         sizeLat = 6,"std", 
-         layout="circle")
-
-#Visualizar Indices de Modificacion
-modindices(AFC38, sort = TRUE, maximum.number = 50)
-
-#Parametros estandarizados
-standardizedSolution(AFC38, type = "std.all", se = TRUE, zstat = TRUE, 
-                     pvalue = TRUE, ci = TRUE, level = 0.95, cov.std = TRUE, 
-                     remove.eq = TRUE, remove.ineq = TRUE, remove.def = FALSE, 
-                     partable = NULL, GLIST = NULL, est = NULL,
-                     output = "data.frame")
-#Residuales
-lavResiduals(AFC38, type = "cor", custom.rmr = NULL,
-             se = TRUE, zstat = TRUE, summary = TRUE, h1.acov = "unstructured",
-             add.type = TRUE, add.labels = TRUE, add.class = TRUE,
-             drop.list.single.group = TRUE,
-             maximum.number = length(res.vech), output = "list")
-
-"""#Modelo con 18 reactivos
-DIECIOCHOfactor<-'SP =~ B13.SE + B34.SE + B41.SE + B5.SM + B45.SE + B20.SE
-SF =~ B9.VS+ B23.VS + B16.VS + B2.VS + B30.VS + B37.VS
-FF =~ B38.MF + B31.MF + B24.MF + B44.MF + B10.MF + B4.MF'
-
-AFC18 <- cfa(DIECIOCHOfactor,orthogonal=FALSE, data=AFC, estimator="ULSMV",ordered =names(AFC))
-AFC18 <- cfa(DIECIOCHOfactor,orthogonal=FALSE, estimator="MLM", data=AFC)
-summary(AFC18, fit.measures=TRUE)
-fitMeasures(AFC18)
-semPaths(AFC18, intercepts = FALSE,
-         edge.label.cex=1.5, 
-         optimizeLatRes = TRUE, 
-         groups = "lat",
-         pastel = TRUE, 
-         exoVar = FALSE, 
-         sizeInt=5,
-         edge.color ="black",
-         esize = 6, 
-         label.prop=2,
-         sizeLat = 6,"std", 
-         layout="tree")
-
-modindices(AFC18, sort = TRUE, maximum.number = 50)
-
-standardizedSolution(AFC18, type = "std.all", se = TRUE, zstat = TRUE, 
-                     pvalue = TRUE, ci = TRUE, level = 0.95, cov.std = TRUE, 
-                     remove.eq = TRUE, remove.ineq = TRUE, remove.def = FALSE, 
-                     partable = NULL, GLIST = NULL, est = NULL,
-                     output = "data.frame")
-
 #Modelo con 12 reactivos
 DOCEfactor<-'SP =~ B34.SE + B13.SE + B41.SE + B5.SM  
 SF =~ B9.VS + B23.VS + B16.VS + B37.VS
@@ -189,42 +121,12 @@ lavResiduals(CFA12, type = "cor", custom.rmr = NULL,
              drop.list.single.group = TRUE,
              maximum.number = length(res.vech), output = "list")
 
-#Modelo con 8 reactivos
-DOSfactor<-'SP =~ B34.SE + B13.SE + B41.SE + B45.SE  
-SF =~ B37.VS + B23.VS + B9.VS + B30.VS'
-
-AFC8 <- cfa(DOSfactor,orthogonal=FALSE, estimator="MLM", data=AFC)
-
-summary(AFC8, fit.measures=TRUE)
-fitMeasures(AFC8)
-semPaths(AFC8, intercepts = FALSE,
-         edge.label.cex=1.5, 
-         optimizeLatRes = TRUE, 
-         groups = "lat",
-         pastel = TRUE, 
-         exoVar = FALSE, 
-         sizeInt=5,
-         edge.color ="black",
-         esize = 6, 
-         label.prop=2,
-         sizeLat = 6,"std", 
-         layout="circle")"""
-
 #METODO DE INVARIANZA DE MEDICION
-#Modelo configuracional
-cfa.config38 <- cfa(TREINTAYOCHOfactor, data = SAP, estimator = "MLM", group = "genero")
-summary(cfa.config38, fit.measures = TRUE, standardized = TRUE)
-
-cfa.config18 <- cfa(DIECIOCHOfactor, data = SAP, estimator = "MLM", group = "genero")
-summary(cfa.config18, fit.measures = TRUE, standardized = TRUE)
-
+#Invarianza configuracional
 cfa.config12 <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "genero")
 summary(cfa.config12, fit.measures = TRUE, standardized = TRUE)
 
-cfa.config8 <- cfa(DOSfactor, data = SAP, estimator = "MLM", group = "salud")
-summary(cfa.config8, fit.measures = TRUE, standardized = TRUE)
-
-semPaths(cfa.config, intercepts = FALSE,
+semPaths(cfa.config12, intercepts = FALSE,
          edge.label.cex=1.5, 
          optimizeLatRes = TRUE, 
          groups = "lat",
@@ -238,23 +140,14 @@ semPaths(cfa.config, intercepts = FALSE,
          layout="circle")
 
 #Invarianza métrica - DEBIL
-cfa.metric8 <- cfa(DOSfactor, data = SAP, estimator = "MLM", group = "salud", 
-                   group.equal = "loadings")
-
 cfa.metric12 <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "genero", 
                     group.equal = "loadings")
 
-cfa.metric18 <- cfa(DIECIOCHOfactor, data = SAP, estimator = "MLM", group = "genero", 
-                    group.equal = "loadings")
-
-cfa.metric38 <- cfa(TREINTAYOCHOfactor, data = SAP, estimator = "MLM", group = "genero", 
-                    group.equal = "loadings")
-
 #Comparacion de modelos (Modelo configuracional vs Modelo metrico)
-compareFit(cfa.config8, cfa.metric8)
-summary(compareFit(cfa.config8, cfa.metric8))
+compareFit(cfa.config12, cfa.metric12)
+summary(compareFit(cfa.config12, cfa.metric12))
 
-semPaths(cfa.metric, intercepts = FALSE,
+semPaths(cfa.metric12, intercepts = FALSE,
          edge.label.cex=1.5, 
          optimizeLatRes = TRUE, 
          groups = "lat",
@@ -268,18 +161,12 @@ semPaths(cfa.metric, intercepts = FALSE,
          layout="circle")
 
 #Invarianza escalar - FUERTE
-cfa.scalar8 <- cfa(DOSfactor, data = SAP, estimator = "MLM", group = "salud", group.equal = c("loadings","intercepts"))
-
 cfa.scalar12 <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "genero", group.equal = c("loadings","intercepts"))
 
-cfa.scalar18 <- cfa(DIECIOCHOfactor, data = SAP, estimator = "MLM", group = "genero", group.equal = c("loadings","intercepts"))
-
-cfa.scalar38 <- cfa(TREINTAYOCHOfactor, data = SAP, estimator = "MLM", group = "genero", group.equal = c("loadings","intercepts"))
-
 #Comparacion de modelos
-summary(compareFit(cfa.metric8, cfa.scalar8))
+summary(compareFit(cfa.metric12, cfa.scalar12))
 
-semPaths(cfa.scalar, intercepts = FALSE,
+semPaths(cfa.scalar12, intercepts = FALSE,
          edge.label.cex=1.5, 
          optimizeLatRes = TRUE, 
          groups = "lat",
@@ -297,13 +184,7 @@ lavTestScore(cfa.scalar)
 parTable(cfa.scalar)"""
 
 #Invarianza estricta
-cfa.strict38 <- cfa(TREINTAYOCHOfactor, data = SAP, estimator = "MLM", group = "genero", group.equal = c("loadings","intercepts", "residuals"))
-
-cfa.strict18 <- cfa(DIECIOCHOfactor, data = SAP, estimator = "MLM", group = "genero", group.equal = c("loadings","intercepts", "residuals"))
-
 cfa.strict12 <- cfa(DOCEfactor, data = SAP, estimator = "MLM", group = "genero", group.equal = c("loadings","intercepts", "residuals"))
-
-cfa.strict8 <- cfa(DOSfactor, data = SAP, estimator = "MLM", group = "salud", group.equal = c("loadings","intercepts", "residuals"))
 
 summary(compareFit(cfa.scalar8, cfa.strict8))
 
